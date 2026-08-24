@@ -1,11 +1,16 @@
 @model Recipe
 
 <form asp-action="Create" method="post">
-    <label asp-for="Name"></label>
-    <input asp-for="Name" />
+    <p>
+        <label asp-for="Name"></label>
+        <input asp-for="Name" />
+        <span asp-validation-for="Name" style="color: red; font-weight: bold;"></span>
+        <br />
+        <label asp-for="PreparationMinutes"></label>
+        <input asp-for="PreparationMinutes" />
+        <span asp-validation-for="PreparationMinutes" style="color: red; font-weight: bold;"></span>
 
-    <label asp-for="PreparationMinutes"></label>
-    <input asp-for="PreparationMinutes" />
+    </p>
 
     <button type="submit">Create</button>
 </form>
