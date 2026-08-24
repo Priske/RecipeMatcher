@@ -27,6 +27,18 @@ public class RecipesController : Controller
     {
         return View();
     }
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
+    {
+        var recipe = await _dbContext.Recipes.FindAsync(id);
+
+        if (recipe is null)
+        {
+            return NotFound();
+        }
+
+        return View(recipe);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Create(Recipe recipe)
