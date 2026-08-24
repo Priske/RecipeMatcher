@@ -1,8 +1,10 @@
+using RecipeMatcher.Web.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddSqlite<AppDbContext>("Data Source=recipe.db");
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,5 +25,13 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using (var scope = scopeFactory.CreateScope())
+{
+    var db =
+        scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+    db.Database.EnsureCreated();
+    SeedData.Initialize(db);
+}
 app.Run();

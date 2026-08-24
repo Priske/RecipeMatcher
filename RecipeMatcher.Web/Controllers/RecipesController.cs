@@ -1,17 +1,23 @@
 using Microsoft.AspNetCore.Mvc;
-using RecipeMatcher.Web.Models;
+using Microsoft.EntityFrameworkCore;
+using RecipeMatcher.Web.Data;
+
 namespace RecipeMatcher.Web.Controllers;
 
 public class RecipesController : Controller
 {
-    public IActionResult Index()
+    private readonly AppDbContext _dbContext;
+
+    public RecipesController(AppDbContext dbContext)
     {
-        var recipes =
-            new List<Recipe>
-            {
-            new() { Id = 1, Name = "Pancakes", PreparationMinutes = 20 },
-            new() { Id = 2, Name = "Tomato Soup", PreparationMinutes = 30 }
-            };
+        _dbContext = dbContext;
+    }
+
+    public async Task<IActionResult> Index()
+    {
+        var recipes = await _dbContext.Recipes
+            .OrderBy(recipe => recipe.Name)
+            .ToListAsync();
 
         return View(recipes);
     }
