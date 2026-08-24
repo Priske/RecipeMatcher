@@ -8,7 +8,7 @@ using RecipeMatcher.Web.Data;
 
 namespace RecipeMatcher.Web.Tests;
 
-public sealed class CustomWebApplicationFactory
+public class CustomWebApplicationFactory
     : WebApplicationFactory<Program>
 {
     private readonly SqliteConnection _connection;
@@ -28,13 +28,12 @@ public sealed class CustomWebApplicationFactory
 
         builder.ConfigureServices(services =>
         {
-            // Remove the real recipe.db configuration.
             services.RemoveAll<
                 DbContextOptions<AppDbContext>>();
 
-            // Replace it with an in-memory SQLite database.
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite(_connection));
+            services.AddDbContext<AppDbContext>(
+                options =>
+                    options.UseSqlite(_connection));
         });
     }
 

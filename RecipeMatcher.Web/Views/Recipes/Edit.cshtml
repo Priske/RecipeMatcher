@@ -1,0 +1,14 @@
+@model Recipe
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+
+    <input asp-for="Id" type="hidden" />
+
+    <label asp-for="Name"></label>
+    <input asp-for="Name" />
+
+    <label asp-for="PreparationMinutes"></label>
+    <input asp-for="PreparationMinutes" />
+
+    <button type="submit">Save</button>
+</form>
