@@ -25,13 +25,18 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
-using (var scope = scopeFactory.CreateScope())
+
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var db =
-        scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    using var scope = app.Services.CreateScope();
+
+    var db = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
 
     db.Database.EnsureCreated();
     SeedData.Initialize(db);
 }
+
 app.Run();
+
+public partial class Program;
