@@ -23,14 +23,18 @@ public class RecipesController : Controller
         return View(recipes);
     }
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
+        ViewBag.Ingredients = await _dbContext.Ingredients.OrderBy(i => i.Name).ToListAsync();
         return View();
     }
     [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
-        var recipe = await _dbContext.Recipes.FindAsync(id);
+        var recipe = await _dbContext.Recipes
+            .Include(recipe => recipe.RecipeIngredients)
+            .ThenInclude(recipeIngredient => recipeIngredient.Ingredient)
+            .SingleOrDefaultAsync(recipe => recipe.Id == id);
 
         if (recipe is null)
         {
@@ -41,11 +45,20 @@ public class RecipesController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Recipe recipe)
+    public async Task<IActionResult> Create(Recipe recipe, int[] ingredientIds)
     {
         if (!ModelState.IsValid)
         {
+            ViewBag.Ingredients = await _dbContext.Ingredients.OrderBy(i => i.Name).ToListAsync();
             return View(recipe);
+        }
+
+        foreach (var ingredientId in ingredientIds)
+        {
+            recipe.RecipeIngredients.Add(new RecipeIngredient
+            {
+                IngredientId = ingredientId
+            });
         }
 
         _dbContext.Recipes.Add(recipe);
@@ -53,6 +66,7 @@ public class RecipesController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {

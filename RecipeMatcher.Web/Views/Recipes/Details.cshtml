@@ -2,4 +2,20 @@
 
 <h1> Recept #@Model.Id: @Model.Name</h1>
 
-<ul>@Model.PreparationMinutes</ul>
+@if (Model.RecipeIngredients.Count == 0)
+{
+    <p>No ingredients added.</p>
+}
+else
+{
+    <ul>
+        @foreach (var ingredient in Model.RecipeIngredients)
+        {
+            <li>
+                @ingredient.Ingredient.Name
+            </li>
+        }
+    </ul>
+}
+
+<ul>Preperation time :@Model.PreparationMinutes</ul>

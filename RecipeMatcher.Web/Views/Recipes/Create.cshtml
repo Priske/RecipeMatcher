@@ -9,7 +9,15 @@
         <label asp-for="PreparationMinutes"></label>
         <input asp-for="PreparationMinutes" />
         <span asp-validation-for="PreparationMinutes" style="color: red; font-weight: bold;"></span>
-
+        @foreach (var ingredient in ViewBag.Ingredients)
+        {
+            <li>
+                <label>
+                    <input type="checkbox" name="ingredientIds" value="@ingredient.Id" />
+                    @ingredient.Name
+                </label>
+            </li>
+        }
     </p>
 
     <button type="submit">Create</button>
