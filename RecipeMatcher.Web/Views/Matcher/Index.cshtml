@@ -1,0 +1,18 @@
+@model MatcherViewModel
+
+<h1>Choose pantry ingredients</h1>
+
+<form asp-action="Index" method="post">
+    @foreach (var ingredient in Model.Ingredients)
+    {
+        <div>
+            <label>
+                <input type="checkbox" name="ingredientIds" value="@ingredient.Id" />
+
+                @ingredient.Name
+            </label>
+        </div>
+    }
+
+    <button type="submit">Submit</button>
+</form>
