@@ -70,25 +70,49 @@ public class RecipesController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var recipe = await _dbContext.Recipes.FindAsync(id);
+        var recipe = await _dbContext.Recipes
+        .Include(recipe => recipe.RecipeIngredients)
+        .SingleOrDefaultAsync(recipe => recipe.Id == id);
 
         if (recipe is null)
         {
             return NotFound();
         }
 
-        return View(recipe);
+        var ingredients = await _dbContext.Ingredients
+            .OrderBy(ingredient => ingredient.Name)
+            .ToListAsync();
+
+        var model = new EditRecipeViewModel
+        {
+            Id = recipe.Id,
+            Name = recipe.Name,
+            PreparationMinutes = recipe.PreparationMinutes,
+            Ingredients = ingredients.Select(ingredient => new IngredientOptionViewModel
+            {
+                Id = ingredient.Id,
+                Name = ingredient.Name,
+                Selected = recipe.RecipeIngredients.Any(
+                    recipeIngredient => recipeIngredient.IngredientId == ingredient.Id)
+            }).ToList()
+        };
+        return View(model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Edit(int id, Recipe recipe)
+    public async Task<IActionResult> Edit(
+        int id,
+        EditRecipeViewModel model,
+        int[] ingredientIds)
     {
-        if (id != recipe.Id)
+        if (id != model.Id)
         {
             return BadRequest();
         }
 
-        var existingRecipe = await _dbContext.Recipes.FindAsync(id);
+        var existingRecipe = await _dbContext.Recipes
+            .Include(recipe => recipe.RecipeIngredients)
+            .SingleOrDefaultAsync(recipe => recipe.Id == id);
 
         if (existingRecipe is null)
         {
@@ -97,11 +121,48 @@ public class RecipesController : Controller
 
         if (!ModelState.IsValid)
         {
-            return View(recipe);
+            var selectedIds = ingredientIds.ToHashSet();
+
+            var ingredients = await _dbContext.Ingredients
+                .OrderBy(ingredient => ingredient.Name)
+                .ToListAsync();
+
+            model.Ingredients = ingredients
+                .Select(ingredient => new IngredientOptionViewModel
+                {
+                    Id = ingredient.Id,
+                    Name = ingredient.Name,
+                    Selected = selectedIds.Contains(ingredient.Id)
+                })
+                .ToList();
+
+            return View(model);
         }
 
-        existingRecipe.Name = recipe.Name;
-        existingRecipe.PreparationMinutes = recipe.PreparationMinutes;
+        existingRecipe.Name = model.Name;
+        existingRecipe.PreparationMinutes = model.PreparationMinutes;
+
+        var selectedIngredientIds = ingredientIds.ToHashSet();
+
+        var currentIngredientIds = existingRecipe.RecipeIngredients
+            .Select(recipeIngredient => recipeIngredient.IngredientId)
+            .ToHashSet();
+
+        var removedIngredients = existingRecipe.RecipeIngredients
+            .Where(recipeIngredient =>
+                !selectedIngredientIds.Contains(recipeIngredient.IngredientId))
+            .ToList();
+
+        _dbContext.RecipeIngredients.RemoveRange(removedIngredients);
+
+        foreach (var ingredientId in selectedIngredientIds.Except(currentIngredientIds))
+        {
+            existingRecipe.RecipeIngredients.Add(new RecipeIngredient
+            {
+                RecipeId = existingRecipe.Id,
+                IngredientId = ingredientId
+            });
+        }
 
         await _dbContext.SaveChangesAsync();
 
