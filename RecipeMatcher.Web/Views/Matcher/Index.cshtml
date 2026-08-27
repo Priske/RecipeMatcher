@@ -7,7 +7,7 @@
     {
         <div>
             <label>
-                <input type="checkbox" name="ingredientIds" value="@ingredient.Id" />
+                <input type="checkbox" name="ingredientIds" value="@ingredient.Id" checked="@ingredient.Selected" />
 
                 @ingredient.Name
             </label>
@@ -31,6 +31,10 @@
                                 <li>Missing ingredient: @missingIngredient.Name</li>
                             }
                         </ul>
+                    }
+                    else
+                    {
+                        <span>All ingredients available</span>
                     }
                 </li>
             }
