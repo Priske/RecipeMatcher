@@ -15,4 +15,25 @@
     }
 
     <button type="submit">Submit</button>
+
+    @if (Model.Recipes.Any())
+    {
+        <h2>Matching Recipes</h2>
+        <ul>
+            @foreach (var recipe in Model.Recipes)
+            {
+                <li>id: @recipe.RecipeId - name: @recipe.Name - minutes: @recipe.PreparationMinutes
+                    @if (recipe.MissingIngredients.Any())
+                    {
+                        <ul>
+                            @foreach (var missingIngredient in recipe.MissingIngredients)
+                            {
+                                <li>Missing ingredient: @missingIngredient.Name</li>
+                            }
+                        </ul>
+                    }
+                </li>
+            }
+        </ul>
+    }
 </form>
